@@ -2,6 +2,7 @@ use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
 
 use {BeforeMiddleware, AfterMiddleware, AroundMiddleware, Handler, Chain};
+
 use {Request, Response, WebResult, WebError};
 
 use self::Kind::{Fine, Prob};

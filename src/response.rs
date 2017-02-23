@@ -34,7 +34,7 @@ impl Response {
     }
 
     pub fn with<M: Modifier<Response>>(m: M) -> Response {
-        let mut res = Response::new();
+        let res = Response::new();
         res.set(m)
     }
 

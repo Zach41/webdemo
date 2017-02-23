@@ -1,18 +1,42 @@
-use std::error::Error as StdError;
+use std::error::Error;
 use std::fmt;
 
-#[derive(Debug, Clone, Copy)]
-pub struct WebError;
+use modifier::Modifier;
+
+use Response;
+
+#[derive(Debug)]
+pub struct WebError {
+    pub error: Box<Error + Send>,
+    pub response: Response,
+}
+
+impl WebError {
+    pub fn new<E, M>(err: E, m: M) -> WebError
+        where E: 'static + Send + Error,
+              M: Modifier<Response> {
+        WebError {
+            error: Box::new(err),
+            response: Response::with(m),
+        }
+    }
+}
 
 impl fmt::Display for WebError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        f.pad("WebError")
+        fmt::Display::fmt(&*self.error, f)
     }
 }
-impl StdError for WebError {
+
+impl Error for WebError {
     fn description(&self) -> &str {
-        "WebError"
+        self.error.description()
+    }
+
+    fn cause(&self) -> Option<&Error> {
+        self.error.cause()
     }
 }
 
 pub type WebResult<T> = Result<T, WebError>;
+pub use hyper::error::Result as HttpResult;

@@ -2,7 +2,6 @@ use std::io;
 use std::fs::File;
 use std::path::{Path, PathBuf};
 
-use status::StatusCode;
 use Url;
 use headers;
 use modifier::{Modifier, Set};
