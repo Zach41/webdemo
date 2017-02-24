@@ -14,3 +14,8 @@ conduit-mime-types = "0.7"
 lazy_static = "0.2"
 num_cpus = "1.2"
 time = "0.1"
+hyper-native-tls = {version = "0.2", optional = true}
+
+[features]
+default = []
+hyper-tls-example = ["hyper-native-tls"]

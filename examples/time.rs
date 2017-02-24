@@ -26,7 +26,8 @@ impl AfterMiddleware for ResponseTime {
 }
 
 fn main() {
-    let mut chain = Chain::new(|_: &mut Request| {
+    let mut chain = Chain::new(|req: &mut Request| {
+        println!("{:?}", req);
         Ok(Response::with((status::StatusCode::Ok, "Hello, World!")))
     });
     chain.before(ResponseTime);

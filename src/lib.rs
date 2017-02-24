@@ -41,6 +41,13 @@ pub mod types {
     pub use typemap::*;
 }
 
+pub mod prelude {
+    pub use {Request, Response, Url, Protocol, WebResult, WebError, HttpResult};
+    pub use {BeforeMiddleware, AfterMiddleware, Chain, AroundMiddleware, Handler};
+    pub use status::*;
+    pub use Method;
+}
+
 pub struct Web<H> {
     handler: H,
     timeouts: Timeout,
@@ -110,11 +117,11 @@ impl<H: Handler> Web<H> {
         HttpListener::new(addr).and_then(|l| self.listen(l, Protocol::HTTP))
     }
 
-    pub fn https<A, S>(self, addr: A, ssl: S) -> HttpResult<Listening>
-        where A: ToSocketAddrs,
-              S: 'static + SslServer + Send + Clone {
-        HttpsListener::new(addr, ssl).and_then(|l| self.listen(l, Protocol::HTTPS))
-    }
+    // pub fn https<A, S>(self, addr: A, ssl: S) -> HttpResult<Listening>
+    //     where A: ToSocketAddrs,
+    //           S: 'static + SslServer + Send + Clone {
+    //     HttpsListener::new(addr, ssl).and_then(|l| self.listen(l, Protocol::HTTPS))
+    // }
 
     pub fn listen<L>(self, mut listener: L, protocol: Protocol) -> HttpResult<Listening>
         where L: 'static + NetworkListener + Send {
