@@ -37,6 +37,10 @@ mod method {
     pub use hyper::method::Method;
 }
 
+pub mod types {
+    pub use typemap::*;
+}
+
 pub struct Web<H> {
     handler: H,
     timeouts: Timeout,

@@ -3,6 +3,7 @@ use std::fs::File;
 use std::path::{Path, PathBuf};
 
 use Url;
+use status::StatusCode;
 use headers;
 use modifier::{Modifier, Set};
 use conduit_mime_types as mime_types;
@@ -26,6 +27,12 @@ impl<'a, 'b, H> Modifier<Request<'a, 'b>> for Header<H>
 impl Modifier<Response> for Mime {
     fn modify(self, res: &mut Response) {
         res.headers.set(headers::ContentType(self));
+    }
+}
+
+impl Modifier<Response> for StatusCode {
+    fn modify(self, res: &mut Response) {
+        res.status = Some(self)
     }
 }
 
