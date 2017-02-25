@@ -19,7 +19,7 @@ mod modifiers;
 
 pub use request::{Request, Url, Body, Protocol};
 pub use response::{Response, WriteBody, BodyReader, ResponseBody};
-pub use error::{WebError, WebResult, HttpResult};
+pub use error::{WebError, WebResult, MiddleError, HyperError};
 pub use middleware::{BeforeMiddleware, AfterMiddleware, AroundMiddleware, Handler, Chain};
 pub use method::Method;
 pub use modifiers::{Header, Redirect, RedirectRaw};
@@ -44,7 +44,7 @@ pub mod types {
 }
 
 pub mod prelude {
-    pub use {Request, Response, Url, Protocol, WebResult, WebError, HttpResult};
+    pub use {Request, Response, Url, Protocol, WebResult, WebError, MiddleError, HyperError};
     pub use {BeforeMiddleware, AfterMiddleware, Chain, AroundMiddleware, Handler};
     pub use status::*;
     pub use Method;
@@ -89,8 +89,12 @@ impl<H: Handler> HyperHandler for RawHandler<H> {
             Ok(mut request) => {
                 self.handler.handle(&mut request).unwrap_or_else(|e| {
                     error!("Error when handling request: {:?}, error: {:?}", request, e);
-                    e.response
-                }).write_back(res);                
+                    let err = match e {
+                        WebError::Middleware(err) => err,
+                        WebError::HTTP(_) => unreachable!(),
+                    };
+                    err.response
+                }).write_back(res);
             },
             Err(e) => {
                 error!("Error creating request: {}", e);
@@ -117,8 +121,10 @@ impl<H: Handler> Web<H> {
         }
     }
 
-    pub fn http<A: ToSocketAddrs>(self, addr: A) -> HttpResult<Listening> {
-        HttpListener::new(addr).and_then(|l| self.listen(l, Protocol::HTTP))
+    pub fn http<A: ToSocketAddrs>(self, addr: A) -> WebResult<Listening> {
+        HttpListener::new(addr)
+            .map_err(From::from)
+            .and_then(|l| self.listen(l, Protocol::HTTP))
     }
 
     // pub fn https<A, S>(self, addr: A, ssl: S) -> HttpResult<Listening>
@@ -127,7 +133,7 @@ impl<H: Handler> Web<H> {
     //     HttpsListener::new(addr, ssl).and_then(|l| self.listen(l, Protocol::HTTPS))
     // }
 
-    pub fn listen<L>(self, mut listener: L, protocol: Protocol) -> HttpResult<Listening>
+    pub fn listen<L>(self, mut listener: L, protocol: Protocol) -> WebResult<Listening>
         where L: 'static + NetworkListener + Send {
         let handler = RawHandler {
             handler: self.handler,
@@ -139,6 +145,6 @@ impl<H: Handler> Web<H> {
         server.keep_alive(self.timeouts.keep_alive);
         server.set_read_timeout(self.timeouts.read_timeout);
         server.set_write_timeout(self.timeouts.write_timeout);
-        server.handle_threads(handler, self.threads)
+        server.handle_threads(handler, self.threads).map_err(From::from)
     }
 }

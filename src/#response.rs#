@@ -53,6 +53,8 @@ impl Response {
     //         inner: extensions,
     //     }
     // }
+
+    // pub fn set
 }
 
 impl Extensible for Response {

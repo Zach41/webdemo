@@ -1,47 +1,47 @@
-use std::io;
-use std::fs::File;
-use std::path::{Path, PathBuf};
-
-use Url;
-use status::StatusCode;
-use headers;
 use modifier::{Modifier, Set};
 use conduit_mime_types as mime_types;
 use hyper::mime::Mime;
+use hyper::status::StatusCode;
+use hyper::Body;
+use hyper::header::{Headers, Header};
 
-use {Request, Response, WriteBody, BodyReader};
+use {Request, Response};
 
 lazy_static! {
     static ref MIME_TYPES: mime_types::Types = mime_types::Types::new().unwrap();
 }
 
-pub struct Header<H: headers::Header + headers::HeaderFormat>(pub H);
-
-impl<'a, 'b, H> Modifier<Request<'a, 'b>> for Header<H>
-    where H: headers::Header + headers::HeaderFormat {
-    fn modify(self, request: &mut Request<'a, 'b>) {
-        request.headers.set(self.0);
-    }
-}
-
 impl Modifier<Response> for Mime {
     fn modify(self, res: &mut Response) {
-        res.headers.set(headers::ContentType(self));
+        res.headers_mut().set(header::ContentType(self));
     }
 }
 
 impl Modifier<Response> for StatusCode {
     fn modify(self, res: &mut Response) {
-        res.status = Some(self)
+        res.set_status(self);
     }
 }
 
-impl Modifier<Response> for Box<WriteBody> {
+impl<T: Into<Body>> Modifier<Response> for T {
     fn modify(self, res: &mut Response) {
-        res.body = Some(self);
+        res.set_body(self);
     }
 }
 
+impl<H: Header> Modifier<Response> for H {
+    fn modify(self, res: &mut Response) {
+        res.headers_mut().set(self);
+    }
+}
+
+impl Modifier<Response> for Headers {
+    fn modify(self, res: &mut Response) {
+        *(res.headers_mut()) = self;
+    }
+}
+
+// TODO: impl Modifier<Response> for String etc
 impl<R: io::Read + Send + 'static> Modifier<Response> for BodyReader<R> {
     fn modify(self, res: &mut Response) {
         res.body = Some(Box::new(self));
