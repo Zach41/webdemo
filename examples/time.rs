@@ -1,9 +1,8 @@
 extern crate webdemo;
 extern crate time;
+extern crate env_logger;
 
-use webdemo::{Web, Request, Response, WebResult, status};
-use webdemo::{Handler, BeforeMiddleware, AfterMiddleware, Chain};
-use webdemo::types;
+use webdemo::prelude::*;
 use time::precise_time_ns;
 
 struct ResponseTime;
@@ -26,9 +25,10 @@ impl AfterMiddleware for ResponseTime {
 }
 
 fn main() {
+    let _ = env_logger::init();
     let mut chain = Chain::new(|req: &mut Request| {
         println!("{:?}", req);
-        Ok(Response::with((status::StatusCode::Ok, "Hello, World!")))
+        Ok(Response::with((StatusCode::Ok, "Hello, World!")))
     });
     chain.before(ResponseTime);
     chain.after(ResponseTime);

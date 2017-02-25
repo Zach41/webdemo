@@ -1,9 +1,9 @@
 extern crate webdemo;
 
-use webdemo::{Request, Response, WebResult, status, Web};
+use webdemo::prelude::*;
 
 fn content_handle(_: &mut Request) -> WebResult<Response> {
-    Ok(Response::with((status::StatusCode::Ok,
+    Ok(Response::with((StatusCode::Ok,
                        webdemo::headers::ContentType::json().0)))
 }
 

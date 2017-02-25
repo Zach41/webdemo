@@ -15,7 +15,11 @@ lazy_static = "0.2"
 num_cpus = "1.2"
 time = "0.1"
 hyper-native-tls = {version = "0.2", optional = true}
+log = "0.3"
 
 [features]
 default = []
 hyper-tls-example = ["hyper-native-tls"]
+
+[dev-dependencies]
+env_logger = "0.3"

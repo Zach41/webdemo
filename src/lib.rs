@@ -8,6 +8,8 @@ extern crate conduit_mime_types;
 #[macro_use]
 extern crate lazy_static;
 extern crate num_cpus;
+#[macro_use]
+extern crate log;
 
 mod request;
 mod response;
@@ -46,6 +48,8 @@ pub mod prelude {
     pub use {BeforeMiddleware, AfterMiddleware, Chain, AroundMiddleware, Handler};
     pub use status::*;
     pub use Method;
+    pub use {Web, Timeout};
+    pub use types;
 }
 
 pub struct Web<H> {
@@ -84,12 +88,12 @@ impl<H: Handler> HyperHandler for RawHandler<H> {
         match Request::from_http(req, self.addr, &self.protocol) {
             Ok(mut request) => {
                 self.handler.handle(&mut request).unwrap_or_else(|e| {
-                    println!("Error when handling request: {:?}, error: {:?}", request, e);
+                    error!("Error when handling request: {:?}, error: {:?}", request, e);
                     e.response
                 }).write_back(res);                
             },
             Err(e) => {
-                println!("Error creating request: {}", e);
+                error!("Error creating request: {}", e);
                 bad_request(res);
             }
         }

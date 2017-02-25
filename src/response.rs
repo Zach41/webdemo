@@ -51,8 +51,7 @@ impl Response {
         };
 
         if let Err(e) = out {
-            // log error, TODO: using log macro            
-            println!("Error writing response: {}", e);
+            error!("Error writing response: {}", e);
         }
     }
 }

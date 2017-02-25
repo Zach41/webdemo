@@ -61,7 +61,7 @@ impl Handler for Chain {
 
 impl Chain {
     fn continue_from_before(&self, idx: usize, req: &mut Request) -> WebResult<Response> {
-        println!("continue from before");
+        info!("continue from before");
         if idx >= self.befores.len() {
             return self.continue_from_handler(req)
         }
@@ -76,7 +76,7 @@ impl Chain {
     }
 
     fn continue_from_after(&self, idx: usize, req: &mut Request, mut resp: Response) -> WebResult<Response> {
-        println!("continue from after");
+        info!("continue from after");
         if idx >= self.afters.len() {
             // done
             return Ok(resp)
@@ -92,7 +92,7 @@ impl Chain {
     }
 
     fn continue_from_handler(&self, req: &mut Request) -> WebResult<Response> {
-        println!("continue from handler");
+        info!("continue from handler");
         match self.handler.as_ref().unwrap().handle(req) {
             Ok(resp) => self.continue_from_after(0, req, resp),
             Err(err) => self.fail_from_after(0, req, err),
@@ -100,7 +100,7 @@ impl Chain {
     }
 
     fn fail_from_before(&self, idx: usize, req: &mut Request,mut err: WebError) -> WebResult<Response> {
-        println!("fail from before");
+        info!("fail from before");
         if idx >= self.befores.len() {
             return self.fail_from_handler(req, err)
         }
@@ -115,7 +115,7 @@ impl Chain {
     }
 
     fn fail_from_after(&self, idx: usize, req: &mut Request, mut err: WebError) -> WebResult<Response> {
-        println!("fail from after");
+        info!("fail from after");
         if idx >= self.afters.len() {
             return Err(err)
         }
@@ -132,7 +132,7 @@ impl Chain {
 
     fn fail_from_handler(&self, req: &mut Request, err: WebError) -> WebResult<Response> {
         // TODO: use debug! macro
-        println!("fail from handler");
+        info!("fail from handler");
         self.fail_from_after(0, req, err)
     }
 }

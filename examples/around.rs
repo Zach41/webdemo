@@ -1,8 +1,7 @@
 extern crate webdemo;
 extern crate time;
 
-use webdemo::{Web, WebResult, Request, Response, status};
-use webdemo::{Handler, AroundMiddleware};
+use webdemo::prelude::*;
 use time::precise_time_ns;
 
 struct Logger;
@@ -39,6 +38,6 @@ impl AroundMiddleware for Logger {
 fn main() {
     Web::new(
         Logger.around(Box::new(|_: &mut Request| {
-            Ok(Response::with((status::StatusCode::Ok, "Hello, World!")))
+            Ok(Response::with((StatusCode::Ok, "Hello, World!")))
         }))).http("0.0.0.0:8080").unwrap();
 }
