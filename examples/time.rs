@@ -27,7 +27,8 @@ impl AfterMiddleware for ResponseTime {
 fn main() {
     let _ = env_logger::init();
     let mut chain = Chain::new(|req: &mut Request| {
-        println!("{:?}", req);
+        println!("{:?}", req.url.path());
+        
         Ok(Response::with((StatusCode::Ok, "Hello, World!")))
     });
     chain.before(ResponseTime);
